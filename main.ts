@@ -50,7 +50,11 @@ namespace emakefun {
     export function cancelSend(): boolean {
         basic.pause(30);
         serial.writeString("+++")
-        if (!emakefun.singleFindUtil("\r\nSEND Canceled\r\n", 500)) {
+        if (!emakefun.singleFindUtil("\r\nSEND Canceled\r\n", 100)) {
+            // serial.writeLine("");
+            // serial.readBuffer(0);
+            serial.writeString("\r\n");
+            serial.readBuffer(0);
             return false;
         }
         return true;
@@ -94,28 +98,36 @@ namespace emakefun {
     //% weight=99
     export function restart(timeout_ms: number): void {
         const end_time = input.runningTime() + timeout_ms;
-        // do {
-        // serial.writeString("AT+RST" + "\r\n");
-        // basic.pause(100);
-        // basic.showString("!2:" + serial.readBuffer(0).toString());
-        // basic.showString("!3:" + serial.readBuffer(0).toString());
-        // basic.showString("!4:" + serial.readBuffer(0).toString());
-        // basic.showString("!5:" + serial.readBuffer(0).toString());
-
-        // basic.pause(2000);
-        // basic.showString("22");
         do {
-            if (writeCommand("AT+RST", "\r\nOK\r\n", 100) && emakefun.singleFindUtil("\r\nready\r\n", 1000)) {
-                if (!writeCommand("AT", "\r\nOK\r\n", 100)) {
-                    throw "Error: WiFi connection failed.";
-                }
-                return;
-            }
-        } while (input.runningTime() < end_time);
+            serial.writeString("AT+RST" + "\r\n");
+            basic.showString("!2:" + serial.readBuffer(0).toString());
+            basic.showString("!3:" + serial.readBuffer(0).toString());
+            cancelSend();
+            basic.pause(1000);
+            basic.showString("22");
+
+            // if (!writeCommand("AT+RST", "\r\nOK\r\n", 1000)) {
+            //     basic.showNumber(11);
+            //     cancelSend();
+            //     continue;
+            // }
+            // if (!emakefun.singleFindUtil("\r\nready\r\n", 1000)) {
+            //     basic.showNumber(12);
+            //     cancelSend();
+            //     continue;
+
+            // }
+            // if (!writeCommand("AT", "\r\nOK\r\n", 100)) {
+            //     basic.showNumber(20)
+            //     throw "Error: WiFi connection failed.";
+            // }
+            // return;
+
+            // } while (input.runningTime() < end_time);
+        } while (true);
+        basic.showNumber(10)
         throw "Error: module restart failed.";
     }
-
-
 
     /**
      * Connect to WiFi.
